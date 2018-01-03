@@ -1,0 +1,64 @@
+#using ggplot2 for graphs
+#install the packages you need
+install.packages("ggplot2")
+install.packages(c("maps","mapdata","ggmap"))
+install.packages("dplyr")
+install.packages("plyr")
+#load the packages
+library(ggplot2)
+library(maps)
+library(mapdata)
+library(ggmap)
+library(dplyr)
+library(plyr)
+
+#set the working directory
+setwd("W:/Kaggle/uspollution")
+
+#read the file
+readData <- read.csv("pollution_us_2000_2016.csv",header = TRUE,stringsAsFactors = FALSE)
+
+#read first few records of the file
+head(readData,4)
+
+#analyze No2 only
+#subset the data you need
+names(readData)
+myData <- readData[,c(6,12)]
+str(myData)
+
+#Q1-What is the highest value of NO2.1st.Max.Value for each state?
+#Step1: Create a dataframe with columns state and NO2.1st.Max.Value where each
+#state has its corresponding max NO2.1st.Max.Value.
+MaxValue <- aggregate(NO2.1st.Max.Value ~ State,myData,max)
+MaxValue
+#extra steps
+#max <- merge(MaxValue,myData)
+#uniqueData <- unique(max)
+#uniqueData
+#extra steps
+#Step2: Plot this data on map.
+geoData <- geocode(MaxValue$State)
+head(geoData)
+#merge the Data
+mergeData <- cbind(MaxValue,geoData)
+head(mergeData)
+#create ggplot
+#ggplot() + geom_polygon(data = mergeData,aes(x=lon,y=lat,size=NO2.1st.Max.Value,color="red",fill="lightblue"))
+
+mapStates <- map_data("state")
+head(mapStates)
+
+gg1 <- ggplot() + geom_polygon(data = mapStates,aes(x=long,y=lat,group=group),fill="lightblue",color="green")
+gg1
+t <- c("Alaska","Hawaii")
+filterData = subset(mergeData, !(State %in% t))
+filterData
+
+gg4 <- gg1 +  geom_point(data = filterData,aes(x=lon,y=lat,size=NO2.1st.Max.Value),color="yellow")  +
+  xlab("") + ylab("") 
+gg4
+
+
+
+ 
